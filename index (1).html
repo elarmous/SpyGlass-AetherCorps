@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SpyGlass-AetherCorps: know what your competitors changed</title>
+<meta name="description" content="SpyGlass-AetherCorps checks your competitors’ online shops every day and emails you a plain-English summary of price changes, new products and sales.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EDF1F2; --chalk:#FFFFFF; --marine:#0F2F3D; --sea:#2E6F7E; --brass:#B7862F; --mist:#C9D6DA;
+  --display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--marine);font-family:var(--body);font-size:17px;line-height:1.6}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--brass);outline-offset:3px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+h1,h2,h3{font-family:var(--display);line-height:1.08;letter-spacing:-.02em}
+h1{font-size:clamp(2.4rem,6vw,4.1rem);font-weight:700}
+h2{font-size:clamp(1.7rem,3.6vw,2.4rem);font-weight:700;margin-bottom:12px}
+h3{font-size:1.25rem;font-weight:500}
+p.lead{font-size:1.15rem;max-width:34em;color:#294855}
+
+/* nav */
+header{padding:20px 0}
+header .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.brand{font-family:var(--display);font-weight:700;font-size:1.15rem;text-decoration:none;letter-spacing:-.01em}
+.brand span{color:var(--brass)}
+nav{display:flex;gap:22px;font-size:.95rem}
+nav a{text-decoration:none}
+nav a:hover{text-decoration:underline}
+
+/* buttons */
+.btn{display:inline-block;background:var(--marine);color:var(--chalk);font:600 1rem var(--body);padding:14px 24px;border:0;border-radius:6px;cursor:pointer;text-decoration:none}
+.btn:hover{background:#17465a}
+.btn.brass{background:var(--brass)}
+.btn.brass:hover{background:#9c7227}
+.btn.ghost{background:transparent;color:var(--marine);border:2px solid var(--marine)}
+.btn.ghost:hover{background:var(--marine);color:var(--chalk)}
+
+/* hero */
+.hero{padding:48px 0 72px}
+.hero .wrap{display:grid;grid-template-columns:1.05fr 1fr;gap:56px;align-items:center}
+.hero h1{margin-bottom:20px}
+.signup{display:flex;gap:10px;margin:28px 0 10px;flex-wrap:wrap}
+.signup input{flex:1 1 220px;min-width:0;padding:14px 16px;font:1rem var(--body);border:2px solid var(--mist);border-radius:6px;background:var(--chalk);color:var(--marine)}
+.signup input:focus{border-color:var(--sea);outline:none}
+.fine{font-size:.9rem;color:#4b6a76}
+#msg{font-weight:600;color:var(--sea);min-height:1.6em}
+
+/* the lens: one memorable element */
+.scope{position:relative;padding:8px 0 40px}
+.feed{background:var(--chalk);border-radius:10px;border:1px solid var(--mist);overflow:hidden}
+.feed-head{padding:14px 20px;border-bottom:1px solid var(--mist);font-weight:600;font-size:.95rem;display:flex;justify-content:space-between}
+.feed-head span{font-weight:400;color:#4b6a76}
+.row{padding:15px 20px;border-bottom:1px solid var(--paper);display:grid;grid-template-columns:auto 1fr;gap:14px;font-size:.95rem}
+.row:last-child{border:0}
+.tag{font-size:.8rem;font-weight:600;padding:3px 9px;border-radius:99px;height:fit-content;white-space:nowrap}
+.t-price{background:#F6E7C6;color:#6d4c0e}
+.t-new{background:#D4E8EC;color:#164b59}
+.t-sale{background:#E3DAF0;color:#3f2c66}
+.t-stock{background:#D9EDD9;color:#1f5a26}
+.row b{font-weight:600}
+.row small{display:block;color:#5a7782;font-size:.85rem}
+.lens{position:absolute;right:-14px;bottom:-6px;width:168px;height:168px;border-radius:50%;border:9px solid var(--brass);background:rgba(255,255,255,.93);box-shadow:0 10px 30px rgba(15,47,61,.28);display:grid;place-content:center;text-align:center;font-family:var(--display);animation:drift 7s ease-in-out infinite}
+.lens s{display:block;color:#7a8f98;font-size:1.05rem}
+.lens strong{display:block;font-size:2.3rem;line-height:1;color:var(--marine)}
+.lens span{display:block;font:500 .8rem var(--body);color:#4b6a76;margin-top:6px}
+@keyframes drift{0%,100%{transform:translate(0,0)}50%{transform:translate(-14px,-26px)}}
+
+/* sections */
+section{padding:72px 0}
+.band{background:var(--marine);color:var(--chalk)}
+.band p.lead{color:#C9D6DA}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;margin-top:40px;list-style:none;padding:0;counter-reset:s}
+.steps li{counter-increment:s;border-top:3px solid var(--brass);padding-top:16px}
+.steps li::before{content:counter(s);font:700 2.2rem var(--display);color:var(--brass);display:block;line-height:1;margin-bottom:10px}
+.steps p{color:#C9D6DA;margin-top:6px}
+
+.digest{display:grid;grid-template-columns:1fr 1.1fr;gap:48px;align-items:start}
+.mail{background:var(--chalk);border:1px solid var(--mist);border-radius:10px;padding:26px 28px}
+.mail .meta{font-size:.88rem;color:#5a7782;border-bottom:1px solid var(--paper);padding-bottom:12px;margin-bottom:16px}
+.mail p{margin-bottom:12px}
+.mail .act{border-left:4px solid var(--brass);padding-left:14px;font-weight:500}
+
+/* pricing */
+.billing{display:inline-flex;border:2px solid var(--marine);border-radius:8px;overflow:hidden;margin:20px 0 36px}
+.billing button{font:600 .95rem var(--body);padding:10px 20px;border:0;background:transparent;color:var(--marine);cursor:pointer}
+.billing button[aria-pressed="true"]{background:var(--marine);color:var(--chalk)}
+.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;align-items:stretch}
+.plan{background:var(--chalk);border:1px solid var(--mist);border-radius:10px;padding:28px;display:flex;flex-direction:column}
+.plan.best{border:3px solid var(--brass)}
+.plan .price{font:700 2.8rem var(--display);margin:10px 0 2px;letter-spacing:-.03em}
+.plan .price small{font:400 1rem var(--body);color:#5a7782;letter-spacing:0}
+.plan .note{font-size:.88rem;color:#5a7782;min-height:1.4em}
+.plan ul{list-style:none;padding:0;margin:20px 0 26px;flex:1}
+.plan li{padding:8px 0;border-top:1px solid var(--paper);font-size:.97rem}
+.badge{font-size:.82rem;font-weight:600;color:#6d4c0e;background:#F6E7C6;padding:3px 10px;border-radius:99px;width:fit-content;margin-bottom:8px}
+
+details{border-top:1px solid var(--mist);padding:18px 0}
+details:last-of-type{border-bottom:1px solid var(--mist)}
+summary{font:500 1.15rem var(--display);cursor:pointer}
+details p{margin-top:10px;max-width:40em;color:#294855}
+.faq{max-width:760px}
+
+footer{padding:40px 0 56px;font-size:.92rem;color:#4b6a76}
+footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+footer a{margin-left:18px}
+
+@media (max-width:860px){
+  .hero .wrap,.digest{grid-template-columns:1fr;gap:40px}
+  .steps,.plans{grid-template-columns:1fr}
+  .lens{right:8px;width:140px;height:140px}
+  .lens strong{font-size:1.9rem}
+}
+@media (prefers-reduced-motion:reduce){.lens{animation:none}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a class="brand" href="#top">SpyGlass<span>-</span>AetherCorps</a>
+    <nav aria-label="Main">
+      <a href="#how">How it works</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">Questions</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <h1>Know what your competitors changed before your customers do.</h1>
+      <p class="lead">SpyGlass-AetherCorps checks your competitors’ online shops every day and emails you a short, plain-English summary of new prices, new products and new sales.</p>
+      <form class="signup" id="join">
+        <label for="email" style="position:absolute;left:-9999px">Email address</label>
+        <input id="email" type="email" placeholder="you@yourshop.com" required autocomplete="email">
+        <button class="btn brass" type="submit">Start my free trial</button>
+      </form>
+      <p id="msg" role="status"></p>
+      <p class="fine">14 days free. No card needed to join the list.</p>
+    </div>
+
+    <div class="scope" aria-label="Example of detected competitor changes">
+      <div class="feed">
+        <div class="feed-head">Changes found today <span>4 competitors watched</span></div>
+        <div class="row"><span class="tag t-price">Price drop</span><div><b>Northfield Goods</b> cut the Trail Pack 30L price.<small>Today, 7:02 am</small></div></div>
+        <div class="row"><span class="tag t-new">New products</span><div><b>Marlow &amp; Finch</b> added 6 items to its spring collection.<small>Today, 7:02 am</small></div></div>
+        <div class="row"><span class="tag t-sale">Sale</span><div><b>Harbor Tea Co.</b> started 15% off on all bundles.<small>Yesterday, 7:01 am</small></div></div>
+        <div class="row"><span class="tag t-stock">Restocked</span><div><b>Northfield Goods</b> has the Linen Tote back in stock.<small>Yesterday, 7:01 am</small></div></div>
+      </div>
+      <div class="lens" aria-hidden="true"><s>$48</s><strong>$39</strong><span>Trail Pack 30L</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="how">
+  <div class="wrap">
+    <h2>Set it up once. It keeps watching.</h2>
+    <p class="lead">No spreadsheets, no checking tabs, no browser extensions.</p>
+    <ol class="steps">
+      <li><h3>Add your competitors</h3><p>Paste the web address of each competitor’s shop or product pages.</p></li>
+      <li><h3>We check every day</h3><p>SpyGlass-AetherCorps compares each page with yesterday’s and spots what changed.</p></li>
+      <li><h3>You get a short summary</h3><p>An email tells you what changed and what it could mean for your shop.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section>
+  <div class="wrap digest">
+    <div>
+      <h2>Summaries you can read in a minute.</h2>
+      <p class="lead">Every week we turn the changes into a few clear sentences, with a suggested next step. You decide what to do with it.</p>
+    </div>
+    <div class="mail" aria-label="Example weekly summary email">
+      <div class="meta">Weekly summary &middot; 3 competitors &middot; 14 changes</div>
+      <p>Northfield Goods lowered prices on 12 items and launched a bundle deal, mostly in outdoor bags.</p>
+      <p>Marlow &amp; Finch added 6 new products and is now out of stock on two best sellers.</p>
+      <p class="act">Worth a look: your Trail Pack is now $9 above Northfield’s price. You could match it, or highlight what makes yours different.</p>
+    </div>
+  </div>
+</section>
+
+<section id="pricing" style="padding-top:24px">
+  <div class="wrap">
+    <h2>Pick how many competitors to watch.</h2>
+    <p class="lead">Every plan starts with a 14-day free trial. Cancel any time.</p>
+    <div class="billing" role="group" aria-label="Billing period">
+      <button type="button" id="mo" aria-pressed="true">Monthly</button>
+      <button type="button" id="yr" aria-pressed="false">Yearly (2 months free)</button>
+    </div>
+    <div class="plans">
+      <div class="plan">
+        <h3>Scout</h3>
+        <div class="price"><span data-m="9" data-y="90">$9</span><small data-per>/month</small></div>
+        <div class="note" data-note></div>
+        <ul>
+          <li>Watch 3 competitors</li>
+          <li>Checked once a day</li>
+          <li>Weekly summary email</li>
+        </ul>
+        <a class="btn ghost" href="#top">Start free trial</a>
+      </div>
+      <div class="plan best">
+        <div class="badge">Most popular</div>
+        <h3>Watch</h3>
+        <div class="price"><span data-m="19" data-y="190">$19</span><small data-per>/month</small></div>
+        <div class="note" data-note></div>
+        <ul>
+          <li>Watch 10 competitors</li>
+          <li>Checked once a day</li>
+          <li>Instant alerts for price drops</li>
+          <li>Weekly summary with suggested actions</li>
+        </ul>
+        <a class="btn brass" href="#top">Start free trial</a>
+      </div>
+      <div class="plan">
+        <h3>Fleet</h3>
+        <div class="price"><span data-m="39" data-y="390">$39</span><small data-per>/month</small></div>
+        <div class="note" data-note></div>
+        <ul>
+          <li>Watch 25 competitors</li>
+          <li>Checked twice a day</li>
+          <li>Instant alerts for every change</li>
+          <li>Weekly summary with suggested actions</li>
+        </ul>
+        <a class="btn ghost" href="#top">Start free trial</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap faq">
+    <h2>Questions</h2>
+    <details><summary>Which shops can I watch?</summary><p>Any public online shop page: Shopify, WooCommerce, Etsy and most custom stores. Pages behind a login can’t be watched.</p></details>
+    <details><summary>Do my competitors know I’m watching?</summary><p>No. We only read pages that anyone can visit, the same way a shopper would.</p></details>
+    <details><summary>Can I change plans or cancel?</summary><p>Yes. You can switch plans or cancel from your account at any time, and you won’t be charged again after you cancel.</p></details>
+    <details><summary>What happens after the free trial?</summary><p>You’ll get a reminder before it ends. If you don’t add a payment method, your account simply pauses.</p></details>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>&copy; <span id="yy">2026</span> SpyGlass-AetherCorps</div>
+    <div><a href="#">Privacy</a><a href="#">Terms</a><a href="mailto:hello@example.com">Contact</a></div>
+  </div>
+</footer>
+
+<script>
+document.getElementById('yy').textContent = new Date().getFullYear();
+
+// Monthly / yearly toggle
+var mo = document.getElementById('mo'), yr = document.getElementById('yr');
+function setBilling(yearly){
+  mo.setAttribute('aria-pressed', String(!yearly));
+  yr.setAttribute('aria-pressed', String(yearly));
+  document.querySelectorAll('[data-m]').forEach(function(el){
+    el.textContent = '$' + (yearly ? el.dataset.y : el.dataset.m);
+  });
+  document.querySelectorAll('[data-per]').forEach(function(el){ el.textContent = yearly ? '/year' : '/month'; });
+  document.querySelectorAll('[data-note]').forEach(function(el){ el.textContent = yearly ? 'Two months free' : ''; });
+}
+mo.onclick = function(){ setBilling(false); };
+yr.onclick = function(){ setBilling(true); };
+
+// Sign-up form. TODO (stage 2): send the email to your database (Supabase) instead of just showing a message.
+document.getElementById('join').addEventListener('submit', function(e){
+  e.preventDefault();
+  document.getElementById('msg').textContent = 'Thanks. We’ll email you as soon as your free trial is ready.';
+  this.reset();
+});
+</script>
+</body>
+</html>
